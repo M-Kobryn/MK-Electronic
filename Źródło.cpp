@@ -3,6 +3,7 @@ using namespace std;
 
 int Kasa::kod = 12345;
 int Karta::PIN = 1234;
+string Formularz::dowod = "dowod";
 
 Produkt::Produkt()
 {
@@ -29,9 +30,12 @@ Magazyn::Magazyn(int pojemnosc, string stan)
 {
 	this->pojemnosc = pojemnosc;
 	this->stan = stan;
-	Zaktualizuj();
+	//Zaktualizuj();
 }
+
 Magazyn data_global(1000, "");
+
+
 void Magazyn::Zaktualizuj()
 {
 	ifstream f;
@@ -47,6 +51,20 @@ void Magazyn::Zaktualizuj()
 		string b = line.substr(pos1, pos2 - pos1);
 		string c = line.substr(pos2 + 1);
 		spis.push_back(Produkt(a, stod(b), c));
+	}
+}
+
+
+void Decyzja::zapis_do_pliku(Produkt p) {
+	fstream plik;
+	plik.open("Magazyn.txt", ios::out | ios::app);
+	if (plik.good() == true)
+	{
+		plik << endl;
+		plik << p.nazwa << ";";
+		plik << p.cena << ";";
+		plik << p.opis;
+		plik.close();
 	}
 }
 
@@ -77,7 +95,20 @@ void Magazyn::Dodanie_Produktu(Produkt przedmiot)
 
 void Magazyn::Usuwanie_Produktu(string nazwa, double cena, string opis)
 {
+	int licznik=0;
+	list<Produkt>::iterator it;
+	for (it = spis.begin(); it != spis.end(); it++)
+	{
+		if ((*it).nazwa == nazwa) {
+			licznik++;
+		}
+	}
+	licznik--;
 	spis.remove(Produkt(nazwa, cena, opis));
+	for (int x = 0; x < licznik; x++)
+	{
+		spis.push_back(Produkt(nazwa, cena, opis));
+	}
 }
 
 void Magazyn::Usuwanie_Produktu(Produkt przedmiot)
@@ -98,7 +129,7 @@ Domowienie::Domowienie(int ILOSC, Produkt p) : ilosc(ILOSC), item(p) {};
 
 void Domowienie::zloznie_zamowienia_na_towar()
 {
-	cout << "Zamowiono es!" << endl;
+	cout << "Zamowiono!" << endl;
 }
 
 void Domowienie::aktualizacja_stanu_magazynu()
@@ -111,7 +142,7 @@ void Domowienie::aktualizacja_stanu_magazynu()
 
 void Produkt::Print()
 {
-	cout << "Nazwa " + nazwa + " Cena: " << cena << " Opis " + opis << endl;
+	cout << "Nazwa: " << nazwa << " Cena: " << cena << " Opis: " << opis << endl;
 }
 
 Kasa::Kasa(Produkt p1) {
@@ -220,12 +251,13 @@ bool Platnosc::zatwierdz() {
 	}
 }
 
-bool Decyzja::podjecie_decyzji(string dowod_zakupu) {
+bool Decyzja::podjecie_decyzji(Dane_Klienta klient) {
 
 	string prove = "dowod";
+
 	int choice;
-	if (dowod_zakupu == prove) {
-		cout << "Czy istnieja widoczne wady wynikajace ze zlego uzywania? 1=Nie 2=Tak";
+	if (klient.Dowod_zakupu == prove) {
+		cout << "Czy istnieja widoczne wady wynikajace ze zlego uzywania? 1=Nie 2=Tak" << endl;
 		cin >> choice;
 		switch (choice)
 		{
@@ -242,8 +274,8 @@ bool Decyzja::podjecie_decyzji(string dowod_zakupu) {
 	}
 }
 
-void Decyzja::przekazanie_decyzji(string dowod) {
-	if (podjecie_decyzji(dowod) == true) {
+void Decyzja::przekazanie_decyzji(bool decy) {
+	if (decy == true) {
 		cout << "Twoja formularz zostal rozpatrzony pozytywnie!" << endl;
 		
 	}
@@ -258,7 +290,7 @@ void Decyzja::odwolanie_od_decyzji() {
 	cin >> odwolanie;
 }
 
-void Formularz::uzupelnienie_danych(string im, string naz, string adres) {
+Dane_Klienta Formularz::uzupelnienie_danych(string im, string naz, string adres) {
 	string dowod;
 	int choice;
 	cout << "Czy klient posiada dowod zakupu?   1=Tak   2=Nie" << endl;
@@ -273,11 +305,10 @@ void Formularz::uzupelnienie_danych(string im, string naz, string adres) {
 	case 2:
 		cout << "Brak mozliwosci zlozenia formularza" << endl;
 		break;
-	default:
-		break;
 	}
-	Dane_Klienta *dane;
+	Dane_Klienta* dane;
 	dane = new Dane_Klienta(im, naz, adres, dowod);
+	return *dane;
 };
 
 void Pracownik::przekazanie_zwroconego_towaru_na_magazyn(Produkt data) {

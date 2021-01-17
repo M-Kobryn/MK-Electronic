@@ -51,12 +51,22 @@ public:
 	Domowienie(int, Produkt);
 };
 
+class Dane_Klienta {
+public:
+	string Imie;
+	string Nazwisko;
+	string Adres;
+	string Dowod_zakupu;
+	Dane_Klienta(string, string, string, string);
+	friend class Formularz;
+};
 
 class Decyzja {
 public:
-	bool podjecie_decyzji(string dowod_zakupu);
-	void przekazanie_decyzji(string dowod_zakupu);
+	bool podjecie_decyzji(Dane_Klienta klient);
+	void przekazanie_decyzji(bool decyzja);
 	void odwolanie_od_decyzji();
+	void zapis_do_pliku(Produkt);
 };
 
 class Formularz {
@@ -64,8 +74,9 @@ private:
 	string status_zgloszenia;
 	string data_zgloszenia;
 	string stan_towaru;
+	static string dowod;
 public:
-	void uzupelnienie_danych(string im, string naz, string adres);
+	Dane_Klienta uzupelnienie_danych(string im, string naz, string adres);
 };
 
 class Pracownik {
@@ -121,13 +132,3 @@ public:
 	friend Platnosc;
 };
 extern Gotowka kwota_global;
-
-class Dane_Klienta {
-	string Imie;
-	string Nazwisko;
-	string Adres;
-	string Dowod_zakupu;
-public:
-	Dane_Klienta(string, string, string, string);
-	friend class Formularz;
-};
