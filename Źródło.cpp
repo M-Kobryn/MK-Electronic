@@ -1,6 +1,8 @@
 #include "Nag³ówek.hpp"
 using namespace std;
+
 int Kasa::kod = 12345;
+int Karta::PIN = 1234;
 
 Produkt::Produkt()
 {
@@ -29,8 +31,7 @@ Magazyn::Magazyn(int pojemnosc, string stan)
 	this->stan = stan;
 	Zaktualizuj();
 }
-Magazyn data_global(1000,"");
-
+Magazyn data_global(1000, "");
 void Magazyn::Zaktualizuj()
 {
 	ifstream f;
@@ -67,10 +68,12 @@ void Magazyn::Dodanie_Produktu(string nazwa, double cena, string opis)
 	spis.push_back(Produkt(nazwa, cena, opis));
 }
 
+
 void Magazyn::Dodanie_Produktu(Produkt przedmiot)
 {
 	spis.push_back(przedmiot);
 }
+
 
 void Magazyn::Usuwanie_Produktu(string nazwa, double cena, string opis)
 {
@@ -82,6 +85,7 @@ void Magazyn::Usuwanie_Produktu(Produkt przedmiot)
 	spis.remove(przedmiot);
 }
 
+
 void Magazyn::Print_list()
 {
 	list<Produkt>::iterator it;
@@ -90,6 +94,7 @@ void Magazyn::Print_list()
 		(*it).Print();
 	}
 }
+Domowienie::Domowienie(int ILOSC, Produkt p) : ilosc(ILOSC), item(p) {};
 
 void Domowienie::zloznie_zamowienia_na_towar()
 {
@@ -172,7 +177,7 @@ Platnosc::Platnosc(double Cena = 0.) : cena(Cena) {};
 Gotowka::Gotowka(double ile = 0) : ilosc(ile) {};
 Gotowka kwota_global(0);
 
-double Gotowka::zwroc_reszte(double koszt,double gotowka) {
+double Gotowka::zwroc_reszte(double koszt, double gotowka) {
 	double reszta;
 	reszta = gotowka - koszt;
 	return reszta;
@@ -189,30 +194,30 @@ bool Platnosc::zatwierdz() {
 	case 1:
 		cout << "Podaj kwote jaka zamierzasz wplacic" << endl;
 		cin >> ilosc;
-			if (ilosc > cena) {
-				kwota_global.zwroc_reszte(cena,ilosc);
-			}
-			else if (ilosc == cena) {
+		if (ilosc > cena) {
+			kwota_global.zwroc_reszte(cena, ilosc);
+		}
+		else if (ilosc == cena) {
+			return true;
+		}
+		else {
+			cout << "Brak wystarczajacej ilosci gotowki " << endl;
+			return false;
+		}
+	case 2:
+		cout << "WprowadŸ kod PIN" << endl;
+		cin >> pin;
+		for (int i = 0; i < 3; i++) {
+			if (pin == karta_global.PIN) {
+				cout << "Poprawna autoryzacja" << endl;
 				return true;
 			}
 			else {
-				cout << "Brak wystarczajacej ilosci gotowki " << endl;
-				return false;
+				cout << "Niepoprawny PIN " << endl;
 			}
-		case 2:
-			cout << "WprowadŸ kod PIN" << endl;
-			cin >> pin;
-			for (int i = 0; i < 3; i++) {
-				if (pin == karta_global.PIN) {
-					cout << "Poprawna autoryzacja" << endl;
-					return true;
-				}
-				else  {
-					cout << "Niepoprawny PIN " << endl;
-				}
-			}
-			return false;
 		}
+		return false;
+	}
 }
 
 bool Decyzja::podjecie_decyzji(string dowod_zakupu) {
@@ -220,7 +225,7 @@ bool Decyzja::podjecie_decyzji(string dowod_zakupu) {
 	string prove = "dowod";
 	int choice;
 	if (dowod_zakupu == prove) {
-		cout << "Czy istnieja widoczne wady wynikajace ze zlego uzywania?";
+		cout << "Czy istnieja widoczne wady wynikajace ze zlego uzywania? 1=Nie 2=Tak";
 		cin >> choice;
 		switch (choice)
 		{
@@ -240,20 +245,10 @@ bool Decyzja::podjecie_decyzji(string dowod_zakupu) {
 void Decyzja::przekazanie_decyzji(string dowod) {
 	if (podjecie_decyzji(dowod) == true) {
 		cout << "Twoja formularz zostal rozpatrzony pozytywnie!" << endl;
+		
 	}
 	else {
 		cout << "Twoj formularz zostal rozpatrzony negatywnie!" << endl;
-		cout << "Czy chcesz odwolac sie od decyzji? Tak=1, Nie=2" << endl;
-		int choice;
-		cin >> choice;
-		switch (choice) {
-		case 1:
-			odwolanie_od_decyzji();
-			break;
-		case 2:
-			cout << "Dziekujemy za odpowiedz :)" << endl;
-			break;
-		}
 	}
 }
 
@@ -265,15 +260,6 @@ void Decyzja::odwolanie_od_decyzji() {
 
 void Formularz::uzupelnienie_danych(string im, string naz, string adres) {
 	string dowod;
-	cout << "Imie: ";
-	cin >> im;
-	cout << endl;
-	cout << "Nazwisko: ";
-	cin >> naz;
-	cout << endl;
-	cout << "Adres: ";
-	cin >> adres;
-	cout << endl;
 	int choice;
 	cout << "Czy klient posiada dowod zakupu?   1=Tak   2=Nie" << endl;
 	cin >> choice;
@@ -285,11 +271,13 @@ void Formularz::uzupelnienie_danych(string im, string naz, string adres) {
 		cout << endl;
 		break;
 	case 2:
+		cout << "Brak mozliwosci zlozenia formularza" << endl;
 		break;
 	default:
 		break;
 	}
-	
+	Dane_Klienta *dane;
+	dane = new Dane_Klienta(im, naz, adres, dowod);
 };
 
 void Pracownik::przekazanie_zwroconego_towaru_na_magazyn(Produkt data) {
@@ -300,6 +288,10 @@ double Pracownik::zwrot_pieniedzy(double koszt) {
 	return koszt;
 }
 
-void wydanie_nowego_towaru(Produkt data) {
+void Pracownik::wydanie_nowego_towaru(Produkt data) {
 	data_global.Usuwanie_Produktu(data);
 }
+void Pracownik::przekazanie_formularza() {
+	cout << "Formularz zostal przekazany kierownikowi" << endl;
+}
+

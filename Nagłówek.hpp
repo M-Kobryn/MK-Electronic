@@ -1,17 +1,22 @@
 #include <iostream>
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <algorithm>
 #include <list>
+
 using namespace std;
 
 class Produkt
 {
+public:
+	friend bool operator==(const Produkt& T1, const Produkt& T2)
+	{
+		return(T1.nazwa == T2.nazwa && T1.cena == T2.cena && T1.opis == T2.opis);
+	}
 	string nazwa;
 	double cena;
 	string opis;
-public:
+	string stan;
 	friend bool operator==(const Produkt& T1, const Produkt& T2);
 	Produkt();
 	Produkt(string nazwa, double cena, string opis);
@@ -21,40 +26,37 @@ public:
 
 class Magazyn
 {
+public:
 	int pojemnosc;
 	string stan;
 	list<Produkt> spis;
-public:
-	list<Produkt> get_spis();
 	Magazyn(int pojemnosc, string stan);
 	void Zaktualizuj();
 	bool Dostepnosc(Produkt przedmiot);
 	void Dodanie_Produktu(string nazwa, double cena, string opis);
 	void Dodanie_Produktu(Produkt przedmiot);
 	void Usuwanie_Produktu(string nazwa, double cena, string opis);
+	void Usuwanie_Produktu(Produkt przedmiot);
 	void Print_list();
 };
+extern Magazyn data_global;
+
 class Domowienie
 {
 	int ilosc;
 	Produkt item;
 public:
-	bool zloznie_zamowienia_na_towar();
-	void aktualizacja_stanu_magazynu(Magazyn Mag);
+	void zloznie_zamowienia_na_towar();
+	void aktualizacja_stanu_magazynu();
+	Domowienie(int, Produkt);
 };
 
-class Magazyn {
-public:
-	bool dostepnosc();
-	void dodanie_produktu();
-	void usuniecie_produktu();
-};
 
 class Decyzja {
 public:
 	bool podjecie_decyzji(string dowod_zakupu);
 	void przekazanie_decyzji(string dowod_zakupu);
-	bool odwolanie_od_decyzji();
+	void odwolanie_od_decyzji();
 };
 
 class Formularz {
@@ -66,36 +68,29 @@ public:
 	void uzupelnienie_danych(string im, string naz, string adres);
 };
 
-class Dane_klienta {
-private:
-	string imie;
-	string nazwisko;
-	string adres;
-	string dowod_zakupu;
-};
-
 class Pracownik {
 public:
-	int przeliczenie_towaru(Produkt baza);
-	void przekazanie_raportu_remamentu();
-	bool przekazanie_formularza();
+	void przekazanie_formularza();
 	void przekazanie_zwroconego_towaru_na_magazyn(Produkt data);
 	double zwrot_pieniedzy(double koszt);
-	bool wydanie_nowego_towaru(Produkt data);
+	void wydanie_nowego_towaru(Produkt data);
 };
+
 class Kasa {
 	Produkt data;
 	static int kod;
+	double cena;
+	list<Produkt> lista_zakupow;
 
 public:
-	bool skanowanie_produktu(bool);
-	bool  wprowadzenie_kodu_rabatowego();
-	void usuniecie_produktu();
-	double koszt_zamowienia();
-	void anulowanie_zakupow();
+	Kasa(Produkt);
+	void skanowanie_produktu(Produkt);
+	void  wprowadzenie_kodu_rabatowego(int);
+	void usuniecie_produktu(Produkt);
+	double koszt_zamowienia(Produkt);
+	void anulowanie_zakupow(bool);
 	void wydruk_paragonu();
-	void rozpoczecie(bool);
-	Produkt lista_zakupow();
+	bool rozpoczecie(bool);
 	friend class Magazyn;
 	friend class Produkt;
 };
@@ -103,23 +98,29 @@ public:
 class Platnosc {
 	double cena;
 public:
+	Platnosc(double);
 	bool zatwierdz();
 };
 
+
 class Karta {
-	int PIN;
 public:
-	bool autoryzacja();
+	static int PIN;
+	void autoryzacja();
 	friend Platnosc;
 };
+
+
+extern Karta karta_global;
 
 class Gotowka {
 	double ilosc;
 public:
-	double zwroc_reszte(double);
+	Gotowka(double);
+	double zwroc_reszte(double, double);
 	friend Platnosc;
 };
-
+extern Gotowka kwota_global;
 
 class Dane_Klienta {
 	string Imie;
@@ -127,5 +128,6 @@ class Dane_Klienta {
 	string Adres;
 	string Dowod_zakupu;
 public:
+	Dane_Klienta(string, string, string, string);
 	friend class Formularz;
 };
