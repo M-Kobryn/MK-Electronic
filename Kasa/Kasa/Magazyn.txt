@@ -1,0 +1,8 @@
+Produkt1;200;Opis
+Produkt2;100;Komptuer
+Produkt3;2137;Monitor
+Produkt4;1;Cola
+Produkt5;900;Cokolwiek
+Produkt3;2137;Monitor
+Produkt3;2137;Monitor
+Produkt3;2137;Monitor
